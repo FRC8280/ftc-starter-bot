@@ -1,0 +1,212 @@
+<!doctype html>
+<!--
+  Source for docs/Starter-Bot-Driver-Controls*.pdf. One page, three controller styles:
+    driver-controls.html#xbox   driver-controls.html#ps4   driver-controls.html#ps5
+  Rebuild all three PDFs with docs/source/make-pdfs.sh after changing the controls in MainTeleOp.java.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Starter Bot Driver Controls</title>
+<style>
+  @page { size: letter landscape; margin: 0.35in 0.5in; }
+  :root { --ink: #1d2128; --muted: #6b7280; --rule: #c9ced6; --accent: #e8681a; --pad: #2b313b; --pad-hi: #3a414d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--ink);
+    font: 14px/1.4 -apple-system, "Inter", "Helvetica Neue", Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 10in; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid var(--ink); padding-bottom: 6px; }
+  .kicker { font-size: 11px; letter-spacing: .12em; font-weight: 600; color: #4b5260; text-transform: uppercase; }
+  h1 { margin: 2px 0 0; font: 800 30px/1.1 "Oswald", "Avenir Next Condensed", "Helvetica Neue", sans-serif; letter-spacing: -.01em; }
+  .mode { text-align: right; }
+  .mode b { display: block; color: var(--accent); font: 800 20px/1.1 "Avenir Next Condensed", "Helvetica Neue", sans-serif; }
+  .mode span { color: #4b5260; font-size: 13px; }
+  svg.pad { display: block; margin: 6px auto 2px; width: 100%; height: 2.8in; }
+  .lbl-k { font-size: 9.5px; letter-spacing: .1em; fill: #4b5260; font-weight: 600; text-transform: uppercase; }
+  .lbl-v { font-size: 12.5px; font-weight: 700; fill: var(--ink); }
+  .lbl-v.off { font-weight: 400; fill: var(--muted); }
+  .lead { stroke: var(--accent); stroke-width: 1.1; fill: none; }
+  .lead.off { stroke: #b8bec8; }
+  .ring { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+  table.ctl { width: 100%; border-collapse: collapse; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+  .row { display: grid; grid-template-columns: 120px 1fr; border-top: 1px solid var(--rule); padding: 6px 0 5px; }
+  .key { align-self: start; justify-self: start; font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace; border: 1px solid #b8bec8; border-radius: 5px; padding: 4px 7px; background: #fafbfc; }
+  .what b { display: block; font-size: 14px; }
+  .what span { color: #4b5260; font-size: 12.5px; }
+  .note { color: #4b5260; font-size: 12.5px; margin: 6px 0 0; }
+  .bottom { display: grid; grid-template-columns: 1.25fr 1fr; gap: 32px; margin-top: 10px; }
+  h2 { font: 800 15px/1.2 "Avenir Next Condensed", "Helvetica Neue", sans-serif; margin: 0 0 6px; }
+  ul { margin: 0; padding-left: 16px; }
+  li { margin: 0 0 3px; font-size: 12.5px; }
+  li::marker { color: var(--accent); }
+  .map { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .map td { border-top: 1px solid var(--rule); padding: 4px 0; }
+  .map td + td { text-align: right; color: #4b5260; }
+  footer { margin-top: 12px; color: var(--muted); font-size: 10.5px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <div class="kicker" data-t="kicker"></div>
+      <h1>Driver Controls</h1>
+    </div>
+    <div class="mode"><b>Match</b><span>After START. Nothing moves before START.</span></div>
+  </header>
+
+  <svg class="pad" viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg" aria-label="Controller diagram">
+    <!-- triggers and bumpers -->
+    <rect x="352" y="68" width="58" height="26" rx="7" fill="var(--pad)" />
+    <rect x="690" y="68" width="58" height="26" rx="7" fill="var(--pad)" />
+    <rect x="335" y="100" width="92" height="15" rx="7" fill="#9aa1ac" />
+    <rect x="673" y="100" width="92" height="15" rx="7" fill="var(--pad)" />
+    <rect class="ring" x="346" y="62" width="70" height="38" rx="10" />
+    <rect class="ring" x="684" y="62" width="70" height="38" rx="10" />
+    <rect class="ring" x="667" y="95" width="104" height="25" rx="10" />
+
+    <!-- body -->
+    <path fill="var(--pad)" d="M405 118 C450 100 650 100 695 118 C760 126 792 160 804 222 C818 296 826 352 784 360
+      C748 366 724 334 694 296 C640 282 460 282 406 296 C376 334 352 366 316 360 C274 352 282 296 296 222
+      C308 160 340 126 405 118 Z" />
+
+    <!-- logo, view, menu -->
+    <circle cx="550" cy="140" r="12" fill="#161a20" />
+    <rect x="490" y="169" width="20" height="13" rx="4" fill="#59606c" />
+    <rect x="590" y="169" width="20" height="13" rx="4" fill="#59606c" />
+    <rect class="ring" x="584" y="163" width="32" height="25" rx="7" />
+    <text x="500" y="200" text-anchor="middle" font-size="8.5" fill="#c3c8d0" data-t="viewShort"></text>
+    <text x="600" y="200" text-anchor="middle" font-size="8.5" fill="#c3c8d0" data-t="menuShort"></text>
+
+    <!-- sticks -->
+    <circle cx="400" cy="178" r="30" fill="#1f242c" /><circle cx="400" cy="178" r="20" fill="var(--pad-hi)" />
+    <circle class="ring" cx="400" cy="178" r="36" />
+    <circle cx="620" cy="242" r="30" fill="#1f242c" /><circle cx="620" cy="242" r="20" fill="var(--pad-hi)" />
+    <circle class="ring" cx="620" cy="242" r="36" />
+
+    <!-- d-pad -->
+    <path fill="#59606c" d="M442 222 h16 v12 h12 v16 h-12 v12 h-16 v-12 h-12 v-16 h12 Z" />
+
+    <!-- face buttons (not used: dimmed) -->
+    <g opacity=".55" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">
+      <circle cx="700" cy="146" r="13" fill="#d4a017" /><text x="700" y="150" data-t="fTop"></text>
+      <circle cx="672" cy="173" r="13" fill="#2f6fd0" /><text x="672" y="177" data-t="fLeft"></text>
+      <circle cx="728" cy="173" r="13" fill="#d0423a" /><text x="728" y="177" data-t="fRight"></text>
+      <circle cx="700" cy="200" r="13" fill="#2f9a4d" /><text x="700" y="204" data-t="fBottom"></text>
+    </g>
+
+    <!-- leads, on top of the controller -->
+    <path class="lead" d="M290 62 H330 L380 80" />
+    <path class="lead off" d="M290 122 H330 L380 107" />
+    <path class="lead" d="M290 178 H360 L400 178" />
+    <path class="lead off" d="M290 234 H420 L500 176" />
+    <path class="lead off" d="M290 290 H400 L450 242" />
+    <path class="lead" d="M810 62 H770 L720 80" />
+    <path class="lead" d="M810 122 H770 L720 107" />
+    <path class="lead off" d="M810 178 H760 L742 172" />
+    <path class="lead" d="M810 234 H680 L600 176" />
+    <path class="lead" d="M810 290 H700 L620 242" />
+
+    <circle cx="380" cy="80" r="2.6" fill="var(--accent)" />
+    <circle cx="380" cy="107" r="2.6" fill="#b8bec8" />
+    <circle cx="400" cy="178" r="2.6" fill="var(--accent)" />
+    <circle cx="500" cy="176" r="2.6" fill="#b8bec8" />
+    <circle cx="450" cy="242" r="2.6" fill="#b8bec8" />
+    <circle cx="720" cy="80" r="2.6" fill="var(--accent)" />
+    <circle cx="720" cy="107" r="2.6" fill="var(--accent)" />
+    <circle cx="742" cy="172" r="2.6" fill="#b8bec8" />
+    <circle cx="600" cy="176" r="2.6" fill="var(--accent)" />
+    <circle cx="620" cy="242" r="2.6" fill="var(--accent)" />
+    <!-- left labels -->
+    <text x="282" y="56" text-anchor="end"><tspan class="lbl-k" data-t="lt"></tspan><tspan class="lbl-v" x="282" dy="16">Intake out</tspan></text>
+    <text x="282" y="116" text-anchor="end"><tspan class="lbl-k" data-t="lb"></tspan><tspan class="lbl-v off" x="282" dy="16">Not used</tspan></text>
+    <text x="282" y="172" text-anchor="end"><tspan class="lbl-k">Left stick</tspan><tspan class="lbl-v" x="282" dy="16">Drive / strafe</tspan></text>
+    <text x="282" y="228" text-anchor="end"><tspan class="lbl-k" data-t="view"></tspan><tspan class="lbl-v off" x="282" dy="16">Not used</tspan></text>
+    <text x="282" y="284" text-anchor="end"><tspan class="lbl-k">D-pad</tspan><tspan class="lbl-v off" x="282" dy="16">Not used</tspan></text>
+    <!-- right labels -->
+    <text x="818" y="56"><tspan class="lbl-k" data-t="rt"></tspan><tspan class="lbl-v" x="818" dy="16">Intake in</tspan></text>
+    <text x="818" y="116"><tspan class="lbl-k" data-t="rb"></tspan><tspan class="lbl-v" x="818" dy="16">Launch (hold)</tspan></text>
+    <text x="818" y="172"><tspan class="lbl-k" data-t="face"></tspan><tspan class="lbl-v off" x="818" dy="16">Not used</tspan></text>
+    <text x="818" y="228"><tspan class="lbl-k" data-t="menu"></tspan><tspan class="lbl-v" x="818" dy="16">Reset forward</tspan></text>
+    <text x="818" y="284"><tspan class="lbl-k">Right stick</tspan><tspan class="lbl-v" x="818" dy="16">Turn</tspan></text>
+  </svg>
+
+  <div class="grid">
+    <div>
+      <div class="row"><span class="key">Left stick</span><div class="what"><b>Drive / strafe</b><span>Robot-centric: stick forward drives the way the robot faces.</span></div></div>
+      <div class="row"><span class="key" data-t="rtKey"></span><div class="what"><b>Intake in</b><span>Pull further for more speed. Release to stop.</span></div></div>
+      <div class="row"><span class="key" data-t="rbKey"></span><div class="what"><b>Launch (hold)</b><span>Spins up the launcher. Feeds by itself once it's up to speed. Release to stop.</span></div></div>
+    </div>
+    <div>
+      <div class="row"><span class="key">Right stick</span><div class="what"><b>Turn</b><span>Left and right only.</span></div></div>
+      <div class="row"><span class="key" data-t="ltKey"></span><div class="what"><b>Intake out</b><span>Reverse, to clear a jam. Both triggers pulled = off.</span></div></div>
+      <div class="row"><span class="key" data-t="menuKey"></span><div class="what"><b>Reset forward</b><span>Field-centric only. Point the robot away from you, then press.</span></div></div>
+    </div>
+  </div>
+  <p class="note" data-t="unused"></p>
+
+  <div class="bottom">
+    <div>
+      <h2>Good to know</h2>
+      <ul>
+        <li>Keep holding <span data-t="rbShort"></span> for the whole volley. The feeder pauses by itself while the launcher gets back up to speed between shots.</li>
+        <li>The intake runs a little faster while the launcher feeds, to push pieces up out of the hopper.</li>
+        <li>Driving is robot-centric unless the code turns field-centric on. Then <span data-t="menuShort2"></span> resets "forward".</li>
+        <li>Keep hands clear of the launcher flywheel.</li>
+      </ul>
+    </div>
+    <div data-show="xbox">
+      <h2>PlayStation controller</h2>
+      <table class="map">
+        <tr><td>A · B · X · Y</td><td>Cross · Circle · Square · Triangle</td></tr>
+        <tr><td>Menu</td><td>Options</td></tr>
+        <tr><td>View</td><td>Share / Create</td></tr>
+        <tr><td>LB · RB · LT · RT</td><td>L1 · R1 · L2 · R2</td></tr>
+      </table>
+    </div>
+    <div data-show="ps">
+      <h2>Xbox-style controller</h2>
+      <table class="map">
+        <tr><td>Cross · Circle · Square · Triangle</td><td>A · B · X · Y</td></tr>
+        <tr><td>Options</td><td>Menu</td></tr>
+        <tr><td data-t="view"></td><td>View</td></tr>
+        <tr><td>L1 · R1 · L2 · R2</td><td>LB · RB · LT · RT</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <footer>From MainTeleOp.java. If the controls change in code, update this sheet (docs/source).</footer>
+</div>
+
+<script>
+  const V = {
+    xbox: { kicker: "FTC Starter Bot · Gamepad 1 · Xbox-style controller",
+      lt: "LT · Left trigger", lb: "LB · Left bumper", rt: "RT · Right trigger", rb: "RB · Right bumper",
+      view: "View (Back)", menu: "Menu (Start)", viewShort: "VIEW", menuShort: "MENU", face: "A · B · X · Y",
+      fTop: "Y", fLeft: "X", fRight: "B", fBottom: "A",
+      rtKey: "RT", ltKey: "LT", rbKey: "RB", menuKey: "Menu (Start)", rbShort: "RB", menuShort2: "Menu",
+      unused: "Not used: LB, D-pad, View, A · B · X · Y." },
+    ps4: { kicker: "FTC Starter Bot · Gamepad 1 · PS4 controller",
+      lt: "L2 · Left trigger", lb: "L1 · Left bumper", rt: "R2 · Right trigger", rb: "R1 · Right bumper",
+      view: "Share", menu: "Options", viewShort: "SHARE", menuShort: "OPTIONS", face: "Cross · Circle · Square · Triangle",
+      fTop: "△", fLeft: "□", fRight: "○", fBottom: "✕",
+      rtKey: "R2", ltKey: "L2", rbKey: "R1", menuKey: "Options", rbShort: "R1", menuShort2: "Options",
+      unused: "Not used: L1, D-pad, Share, Cross · Circle · Square · Triangle." },
+    ps5: { kicker: "FTC Starter Bot · Gamepad 1 · PS5 DualSense controller",
+      lt: "L2 · Left trigger", lb: "L1 · Left bumper", rt: "R2 · Right trigger", rb: "R1 · Right bumper",
+      view: "Create", menu: "Options", viewShort: "CREATE", menuShort: "OPTIONS", face: "Cross · Circle · Square · Triangle",
+      fTop: "△", fLeft: "□", fRight: "○", fBottom: "✕",
+      rtKey: "R2", ltKey: "L2", rbKey: "R1", menuKey: "Options", rbShort: "R1", menuShort2: "Options",
+      unused: "Not used: L1, D-pad, Create, Cross · Circle · Square · Triangle." }
+  };
+  const key = (location.hash || "#xbox").slice(1);
+  const v = V[key] || V.xbox;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = v[el.dataset.t]; });
+  document.querySelectorAll("[data-show]").forEach(el => {
+    const ps = key !== "xbox";
+    el.style.display = (el.dataset.show === "ps") === ps ? "" : "none";
+  });
+</script>
+</body>
+</html>
