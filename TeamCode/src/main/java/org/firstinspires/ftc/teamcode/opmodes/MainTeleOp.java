@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.util.GamepadControls;
  *   Right trigger       intake in (proportional: pull further = faster)
  *   Left trigger        intake out (proportional). Both triggers = off
  *   Right bumper        hold: spin up the launcher. Once it's at speed, the windmill feeds and the
- *                       intake gets a little extra power. Release: launcher and windmill stop
+ *                       intake gets a little extra power. Release: windmill stops, flywheel coasts down
  *   Options             set field-centric "forward" to where the robot faces (field-centric only)
  *
  * Before START (field-centric only):

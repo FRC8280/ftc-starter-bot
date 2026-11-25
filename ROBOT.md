@@ -43,7 +43,7 @@ autos/paths/                  put Turtle Tracer exports here
 | `intakePower = right_trigger - left_trigger` | `IntakeSubsystem.driverControl` |
 | Intake motor + both corner servos get the same power; right servo reversed | `IntakeSubsystem.periodic` writes all three once per loop |
 | Launcher `RUN_USING_ENCODER`, PIDF (40, 0, 0, 12.5) | `LauncherSubsystem`: `LAUNCHER_P/I/D/F`, re-sent when changed in Panels |
-| Right bumper held: `setVelocity(1250)`, else 0 | `LauncherSubsystem.driverControl` |
+| Right bumper held: `setVelocity(1250)`, else `setVelocity(0)` (brakes the flywheel hard) | `LauncherSubsystem.driverControl`. **One change:** released, the flywheel coasts down instead of braking (`COAST_WHEN_OFF`, below) |
 | Windmill runs only while bumper held AND velocity > 1200 | `LauncherSubsystem.periodic`: same check in TeleOp and Auto |
 | `intakePower += 0.5` while the windmill feeds | `FEED_ASSIST_POWER`, added in `IntakeSubsystem.periodic` |
 | Windmill reversed; CR servos set to 0 at init | Same |
@@ -115,7 +115,7 @@ The same as the BioBuzz StarterBot TeleOp, plus Options for field-centric.
 | Right stick X | Turn |
 | Right trigger | Intake in. Proportional: pull further for more speed |
 | Left trigger | Intake out (reverse). Proportional. Both triggers fully pulled = off |
-| Right bumper | Hold: spin up the launcher. Once it's above `LAUNCHER_MIN_VELOCITY`, the windmill feeds and the intake gets `FEED_ASSIST_POWER` extra. Release: launcher and windmill stop |
+| Right bumper | Hold: spin up the launcher. Once it's above `LAUNCHER_MIN_VELOCITY`, the windmill feeds and the intake gets `FEED_ASSIST_POWER` extra. Release: the windmill stops and the flywheel coasts down |
 | Options | Field-centric only: make "forward" the way the robot faces now |
 
 A button already held when START is pressed is ignored until it is released and pressed again (Options only;
@@ -146,6 +146,12 @@ The flywheel runs under the hub's velocity control (`RUN_USING_ENCODER`), so it 
 (1250 ticks/s, about 2,678 RPM) as the battery drops and as shots slow it down. The windmill only turns while the
 flywheel is above `LAUNCHER_MIN_VELOCITY` (1200 ticks/s), so a game piece is never fed into a slow wheel: hold the
 bumper and the windmill pauses by itself while the flywheel recovers between shots.
+
+**Coasting when off:** with `COAST_WHEN_OFF = true` (the default), turning the launcher off switches the motor to
+`RUN_WITHOUT_ENCODER` at 0 power with FLOAT, so the flywheel coasts to a stop. (Velocity control with a target of 0,
+which BioBuzz uses, makes the hub brake the wheel hard.) Spinning up switches back to `RUN_USING_ENCODER`. Pressing the
+bumper again while it's still coasting picks up from the current speed, so the next shot is ready sooner. Set
+`COAST_WHEN_OFF = false` for the BioBuzz behavior.
 
 If the flywheel speed jumps far past the target and never comes back, the encoder is unplugged, on a different
 port than the motor, or the motor polarity is reversed somewhere in the wiring.

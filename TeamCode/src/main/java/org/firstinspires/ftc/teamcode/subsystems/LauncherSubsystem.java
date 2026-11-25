@@ -35,6 +35,11 @@ import java.util.function.BooleanSupplier;
  *   - While the windmill feeds, the intake gets FEED_ASSIST_POWER extra to push pieces up
  *     (IntakeSubsystem reads {@link #isFeeding()}).
  *
+ * One change from BioBuzz: when the flywheel is turned off it COASTS to a stop instead of braking.
+ * Under velocity control, a target of 0 makes the hub drive the wheel to a stop, so "off" switches the
+ * motor to RUN_WITHOUT_ENCODER at 0 power with FLOAT, and spinning up switches back to
+ * RUN_USING_ENCODER. Set COAST_WHEN_OFF to false for the BioBuzz behavior.
+ *
  * Commands only set what is wanted (a target speed, feed or not). {@link #periodic()} writes the
  * motor and servo once per loop, and decides if the windmill may feed, the same in TeleOp and Auto.
  *
@@ -59,6 +64,12 @@ public class LauncherSubsystem implements Subsystem {
     public static double LAUNCHER_D = 0;
     public static double LAUNCHER_F = 12.5;
 
+    /**
+     * true: when turned off, the flywheel coasts down on its own. false: it's held at 0 ticks/s,
+     * which brakes it hard (the BioBuzz behavior).
+     */
+    public static boolean COAST_WHEN_OFF = true;
+
     public static double WINDMILL_POWER = 1.0;
     /** Added to the intake power while the windmill feeds, to help push pieces up out of the hopper. */
     public static double FEED_ASSIST_POWER = 0.5;
@@ -79,14 +90,19 @@ public class LauncherSubsystem implements Subsystem {
     private boolean feedRequested = false;
     private boolean feeding = false;
     private final double[] appliedPidf = new double[4];
+    /** Which mode the motor is in, so the mode is only changed when it needs to be. */
+    private boolean velocityMode = false;
 
     public LauncherSubsystem(HardwareMap hardwareMap) {
         launcher = hardwareMap.get(DcMotorEx.class, LAUNCHER_MOTOR);
         windmill = hardwareMap.get(CRServo.class, WINDMILL_SERVO);
 
+        // FLOAT so the flywheel coasts whenever it's at 0 power (see COAST_WHEN_OFF).
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         // If the speed jumps far past the target with no control, check that the encoder cable is
         // in the port next to the motor's power port, and that the motor polarity is consistent.
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        velocityMode = true;
         applyPidf();
 
         // Reversed, as in the BioBuzz TeleOp, so positive power feeds toward the flywheel.
@@ -143,10 +159,31 @@ public class LauncherSubsystem implements Subsystem {
         windmill.setPower(power);
     }
 
-    /** For the Launcher Test only: set the flywheel speed right now. */
+    /** For the Launcher Test only: set the flywheel speed right now (0 = off). */
     public void testVelocity(double velocity) {
-        if (pidfChanged()) applyPidf();
-        launcher.setVelocity(velocity);
+        writeFlywheel(velocity);
+    }
+
+    /**
+     * Spin the flywheel at {@code velocity} ticks/second under velocity control, or turn it off.
+     * Off coasts (0 power, FLOAT, no velocity control) unless COAST_WHEN_OFF is false.
+     */
+    private void writeFlywheel(double velocity) {
+        if (velocity > 0 || !COAST_WHEN_OFF) {
+            if (!velocityMode) {
+                launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                velocityMode = true;
+                applyPidf();
+            }
+            if (pidfChanged()) applyPidf();
+            launcher.setVelocity(velocity);
+        } else {
+            if (velocityMode) {
+                launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                velocityMode = false;
+            }
+            launcher.setPower(0);
+        }
     }
 
     @Override
@@ -157,8 +194,7 @@ public class LauncherSubsystem implements Subsystem {
 
     @Override
     public void periodic() {
-        if (pidfChanged()) applyPidf();
-        launcher.setVelocity(targetVelocity);
+        writeFlywheel(targetVelocity);
         // Feed only when asked AND the flywheel is fast enough to make the throw.
         feeding = feedRequested && targetVelocity > 0 && isAtSpeed();
         windmill.setPower(feeding ? WINDMILL_POWER : 0);
@@ -168,8 +204,7 @@ public class LauncherSubsystem implements Subsystem {
     public void stop() {
         set(0, false);
         feeding = false;
-        launcher.setVelocity(0);
-        launcher.setPower(0);
+        writeFlywheel(0);
         windmill.setPower(0);
     }
 
@@ -177,7 +212,8 @@ public class LauncherSubsystem implements Subsystem {
 
     /**
      * TeleOp, from the BioBuzz StarterBot: hold the button to spin the flywheel up, and the
-     * windmill feeds once it reaches LAUNCHER_MIN_VELOCITY. Release to stop both.
+     * windmill feeds once it reaches LAUNCHER_MIN_VELOCITY. Release: the windmill stops and the flywheel
+     * coasts down (COAST_WHEN_OFF).
      */
     public Command driverControl(BooleanSupplier launch) {
         return infinite(() -> {
