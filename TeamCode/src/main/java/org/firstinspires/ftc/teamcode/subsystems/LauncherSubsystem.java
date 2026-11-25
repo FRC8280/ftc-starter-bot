@@ -84,7 +84,6 @@ public class LauncherSubsystem implements Subsystem {
         launcher = hardwareMap.get(DcMotorEx.class, LAUNCHER_MOTOR);
         windmill = hardwareMap.get(CRServo.class, WINDMILL_SERVO);
 
-        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // let the flywheel coast down
         // If the speed jumps far past the target with no control, check that the encoder cable is
         // in the port next to the motor's power port, and that the motor polarity is consistent.
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
